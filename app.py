@@ -1,12 +1,3 @@
-"""
-Flask Application for Fire Weather Index (FWI) Prediction
-=========================================================
-This application deploys a Ridge Regression model to predict FWI based on environmental data.
-
-Author: ML Engineer
-Date: December 2025
-"""
-
 from flask import Flask, render_template, request, jsonify
 import pickle
 import numpy as np
