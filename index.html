@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Weather Index (FWI) Prediction Model by BAVANANDHAN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fa;
+            --text-dark: #2c3e50;
+            --text-light: #ecf0f1;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        /* Input Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: var(--transition);
+            background-color: #f5f5f5;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background-color: white;
+            box-shadow: 0 0 8px rgba(78, 205, 196, 0.3);
+        }
+
+        .input-hint {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Grid Layout for Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #ff5252);
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #3eb8b0;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #95a5a6;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-reset:hover {
+            background: #7f8c8d;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Result Display */
+        .result-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .result-hidden {
+            display: none;
+        }
+
+        .fwi-value {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+            width: 100%;
+            margin: 15px 0;
+            color: white;
+        }
+
+        .risk-low {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .risk-moderate {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .risk-high {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .risk-extreme {
+            background: linear-gradient(135deg, #8b0000, #660000);
+        }
+
+        .metric {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-item {
+            background: var(--light-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 5px;
+        }
+
+        /* Model Info */
+        .model-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-top: 30px;
+        }
+
+        .model-info h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.95em;
+        }
+
+        .info-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .info-label {
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 1.1em;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #fee;
+            border-left: 4px solid var(--primary-color);
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #efe;
+            border-left: 4px solid #2ecc71;
+            color: #2c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Feature Importance */
+        .feature-bar {
+            margin: 15px 0;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95em;
+        }
+
+        .bar {
+            background: #e0e0e0;
+            height: 25px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2ecc71;
+            margin-right: 8px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fwi-value {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔥 Fire Weather Index Predictor</h1>
+            <p>Advanced Ridge Regression Model for Forest Fire Risk Assessment </p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Input Form Card -->
+            <div class="card">
+                <h2>📊 Input Environmental Data</h2>
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" name="temperature" min="0" max="50" step="0.1" required>
+                            <div class="input-hint">Range: 0-50°C</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="humidity">Relative Humidity (%)</label>
+                            <input type="number" id="humidity" name="humidity" min="0" max="100" step="0.1" required>
+                            <div class="input-hint">Range: 0-100%</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="windSpeed">Wind Speed (km/h)</label>
+                            <input type="number" id="windSpeed" name="windSpeed" min="0" max="50" step="0.1" required>
+                            <div class="input-hint">Range: 0-50 km/h</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rain">Rain (mm)</label>
+                            <input type="number" id="rain" name="rain" min="0" max="20" step="0.1" required>
+                            <div class="input-hint">Range: 0-20 mm</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ffmc">FFMC (Fine Fuel Moisture)</label>
+                            <input type="number" id="ffmc" name="ffmc" min="0" max="100" step="0.1" required>
+                            <div class="input-hint">Range: 0-100</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dmc">DMC (Duff Moisture Code)</label>
+                            <input type="number" id="dmc" name="dmc" min="0" max="300" step="0.1" required>
+                            <div class="input-hint">Range: 0-300</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isi">ISI (Initial Spread Index)</label>
+                            <input type="number" id="isi" name="isi" min="0" max="50" step="0.1" required>
+                            <div class="input-hint">Range: 0-50</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="region">Region</label>
+                            <select id="region" name="region" required>
+                                <option value="">Select Region...</option>
+                                <option value="Bejaia">Bejaia</option>
+                                <option value="Sidi-Bel-Abbes">Sidi-Bel-Abbes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">🎯 Predict FWI</button>
+                    <div class="button-group">
+                        <button type="reset" class="btn btn-reset">🔄 Reset</button>
+                        <button type="button" class="btn btn-secondary" id="exampleBtn">📋 Load Example</button>
+                    </div>
+                </form>
+
+                <div class="error-message" id="errorMsg"></div>
+                <div class="success-message" id="successMsg"></div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing weather conditions...</p>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card">
+                <h2>📈 Prediction Results</h2>
+                <div id="resultSection" class="result-hidden">
+                    <div style="text-align: center;">
+                        <p style="color: #666; font-size: 0.95em;">Fire Weather Index</p>
+                        <div class="fwi-value" id="fwiValue">--</div>
+                        <div class="risk-badge" id="riskBadge">--</div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-item">
+                            <div class="metric-label">Confidence Level</div>
+                            <div class="metric-value" id="confidence">--</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Model Accuracy (R²)</div>
+                            <div class="metric-value">98.29%</div>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-item">
+                            <div class="metric-label">Avg Error (MAE)</div>
+                            <div class="metric-value">±1.62</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Prediction Time</div>
+                            <div class="metric-value" id="predTime">--</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3 style="color: var(--primary-color); margin-bottom: 15px;">Feature Impact</h3>
+                        <div id="featureImportance"></div>
+                    </div>
+                </div>
+
+                <div id="placeholderMsg" style="text-align: center; color: #999; padding: 40px 0;">
+                    <p style="font-size: 1.1em;">🎲 Enter data and click "Predict FWI"</p>
+                    <p style="margin-top: 10px; font-size: 0.95em;">Results will appear here</p>
+                </div>
+
+                <div class="model-info">
+                    <h3>✓ Model Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Algorithm</div>
+                            <div class="info-value">Ridge Regression</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Optimal Alpha</div>
+                            <div class="info-value">0.8302</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Training Samples</div>
+                            <div class="info-value">400</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Features Used</div>
+                            <div class="info-value">8</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Test R² Score</div>
+                            <div class="info-value">0.9829</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value"><span class="status-indicator"></span>Ready</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>🌍 Fire Weather Index Prediction System | Ridge Regression ML Model | Production Ready</p>
+        <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">Deployed on Render/Railway | Flask Backend | Real-time Predictions</p>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultSection = document.getElementById('resultSection');
+        const placeholderMsg = document.getElementById('placeholderMsg');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        const exampleBtn = document.getElementById('exampleBtn');
+
+        // Feature importance display
+        const featureImportance = {
+            'DMC': 13.26,
+            'FFMC': 7.05,
+            'RH': 4.60,
+            'ISI': 2.69,
+            'Temperature': 1.13,
+            'Wind Speed': 0.88,
+            'Rain': 0.07,
+            'Region': 0.003
+        };
+
+        const maxImportance = Math.max(...Object.values(featureImportance));
+
+        function displayFeatureImportance() {
+            const container = document.getElementById('featureImportance');
+            container.innerHTML = '';
+            
+            Object.entries(featureImportance)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .forEach(([feature, value]) => {
+                    const percentage = (value / maxImportance) * 100;
+                    const html = `
+                        <div class="feature-bar">
+                            <div class="feature-name">
+                                <span>${feature}</span>
+                                <span>${value.toFixed(2)}</span>
+                            </div>
+                            <div class="bar">
+                                <div class="bar-fill" style="width: ${percentage}%;"></div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                temperature: parseFloat(document.getElementById('temperature').value),
+                humidity: parseFloat(document.getElementById('humidity').value),
+                wind_speed: parseFloat(document.getElementById('windSpeed').value),
+                rain: parseFloat(document.getElementById('rain').value),
+                ffmc: parseFloat(document.getElementById('ffmc').value),
+                dmc: parseFloat(document.getElementById('dmc').value),
+                isi: parseFloat(document.getElementById('isi').value),
+                region: document.getElementById('region').value
+            };
+
+            clearMessages();
+            loading.style.display = 'block';
+            resultSection.classList.add('result-hidden');
+            placeholderMsg.style.display = 'block';
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const endTime = performance.now();
+
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    displayResults(data, endTime - startTime);
+                    successMsg.textContent = '✓ Prediction successful!';
+                    successMsg.classList.add('show');
+                } else {
+                    showError(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showError('Error connecting to server: ' + error.message);
+            }
+        });
+
+        function displayResults(data, predTime) {
+            placeholderMsg.style.display = 'none';
+            resultSection.classList.remove('result-hidden');
+
+            document.getElementById('fwiValue').textContent = data.prediction;
+            document.getElementById('predTime').textContent = predTime.toFixed(0) + 'ms';
+            document.getElementById('confidence').textContent = data.confidence;
+
+            const riskBadge = document.getElementById('riskBadge');
+            riskBadge.textContent = data.risk_level;
+            riskBadge.className = `risk-badge risk-${data.risk_level.toLowerCase()}`;
+
+            displayFeatureImportance();
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = '✗ Error: ' + msg;
+            errorMsg.classList.add('show');
+        }
+
+        function clearMessages() {
+            errorMsg.classList.remove('show');
+            successMsg.classList.remove('show');
+        }
+
+        // Example data
+        exampleBtn.addEventListener('click', () => {
+            document.getElementById('temperature').value = '35';
+            document.getElementById('humidity').value = '30';
+            document.getElementById('windSpeed').value = '15';
+            document.getElementById('rain').value = '0';
+            document.getElementById('ffmc').value = '90';
+            document.getElementById('dmc').value = '200';
+            document.getElementById('isi').value = '40';
+            document.getElementById('region').value = 'Sidi-Bel-Abbes';
+        });
+
+        // Initialize
+        displayFeatureImportance();
+    </script>
+</body>
+</html>
